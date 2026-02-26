@@ -442,9 +442,10 @@ let slotItemH = 60;
 
 /* ─── WEBSOCKET ─── */
 function connect() {
+  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
   const host = location.hostname;
-  const port = location.port || 3000;
-  ws = new WebSocket(`ws://${host}:${port}`);
+  const port = location.port ? ':' + location.port : '';
+  ws = new WebSocket(`${protocol}//${host}${port}`);
 
   ws.onopen = () => {
     document.getElementById('connDot').classList.add('live');
@@ -715,4 +716,4 @@ function showScoreFlash(text, positive) {
 connect();
 </script>
 </body>
-</html>player.html
+</html>
