@@ -155,7 +155,9 @@ html,body{height:100%;background:var(--void);color:#f0f0f0;font-family:'Rajdhani
 
   // Check WS
   try {
-    const ws = new WebSocket(`ws://${h}:${p}`);
+    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const port = location.port ? ':' + location.port : '';
+    const ws = new WebSocket(`${protocol}//${h}${port}`);
     ws.onopen = () => {
       document.getElementById('dot').classList.add('live');
       document.getElementById('connTxt').textContent = 'Server Online';
