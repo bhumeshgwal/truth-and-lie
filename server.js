@@ -316,7 +316,7 @@ function handleMessage(type, data) {
   }
 }
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 server.listen(PORT, '0.0.0.0', () => {
   const os = require('os');
   const nets = os.networkInterfaces();
