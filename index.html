@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>2 Truths 1 Lie — Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--fire:#ff4d00;--gold:#ffd700;--neon:#00ffe0;--void:#06080f;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--void);color:#f0f0f0;font-family:'Rajdhani',sans-serif;}
+.bg{
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 0%,rgba(255,77,0,.18) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 90% 90%,rgba(0,255,224,.1) 0%,transparent 50%),
+    var(--void);
+}
+.bg::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.wrap{
+  position:relative;z-index:1;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:40px;padding:30px 20px;
+}
+.logo{text-align:center;}
+.logo-title{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,8vw,5rem);
+  letter-spacing:.2em;
+  background:linear-gradient(135deg,var(--fire),var(--gold),#fff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.logo-sub{
+  font-size:.75rem;letter-spacing:.35em;
+  color:rgba(240,240,240,.4);text-transform:uppercase;margin-top:4px;
+}
+
+.cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;width:100%;max-width:700px;}
+.card{
+  flex:1;min-width:260px;max-width:320px;
+  border-radius:20px;padding:32px 24px;text-align:center;
+  text-decoration:none;color:#f0f0f0;
+  transition:all .25s;cursor:pointer;
+  position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;inset:0;opacity:0;transition:opacity .25s;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(255,255,255,.06),transparent);
+}
+.card:hover::before{opacity:1;}
+.card:hover{transform:translateY(-4px);}
+
+.card-admin{
+  background:rgba(255,77,0,.07);
+  border:1.5px solid rgba(255,77,0,.35);
+  box-shadow:0 8px 32px rgba(255,77,0,.1);
+}
+.card-admin:hover{box-shadow:0 12px 40px rgba(255,77,0,.2);border-color:rgba(255,77,0,.6);}
+
+.card-player{
+  background:rgba(0,255,224,.05);
+  border:1.5px solid rgba(0,255,224,.25);
+  box-shadow:0 8px 32px rgba(0,255,224,.08);
+}
+.card-player:hover{box-shadow:0 12px 40px rgba(0,255,224,.15);border-color:rgba(0,255,224,.5);}
+
+.card-icon{font-size:3rem;margin-bottom:14px;display:block;}
+.card-name{
+  font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.12em;
+  margin-bottom:8px;
+}
+.card-admin .card-name{color:var(--fire);}
+.card-player .card-name{color:var(--neon);}
+.card-desc{font-size:.82rem;color:rgba(240,240,240,.5);line-height:1.5;margin-bottom:16px;}
+.card-badge{
+  display:inline-block;padding:5px 16px;border-radius:999px;
+  font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:.1em;
+}
+.card-admin .card-badge{background:rgba(255,77,0,.15);border:1px solid rgba(255,77,0,.4);color:var(--fire);}
+.card-player .card-badge{background:rgba(0,255,224,.1);border:1px solid rgba(0,255,224,.3);color:var(--neon);}
+
+.hint{
+  text-align:center;max-width:520px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:14px;padding:16px 20px;
+}
+.hint-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.12em;color:var(--gold);margin-bottom:8px;}
+.hint-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.hint-row:last-child{border-bottom:none;}
+.hint-device{font-size:.7rem;font-weight:700;min-width:80px;color:rgba(240,240,240,.6);text-transform:uppercase;letter-spacing:.08em;}
+.hint-url{font-family:'Courier New',monospace;font-size:.78rem;color:var(--neon);}
+
+.conn{display:flex;align-items:center;gap:6px;margin-top:-20px;}
+.dot{width:8px;height:8px;border-radius:50%;background:#ff003c;transition:background .3s;}
+.dot.live{background:#00ff64;box-shadow:0 0 6px #00ff64;}
+.conn-txt{font-size:.65rem;letter-spacing:.12em;color:rgba(240,240,240,.4);text-transform:uppercase;}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+
+  <div class="logo">
+    <div class="logo-title">2 TRUTHS 1 LIE</div>
+    <div class="logo-sub">Live Game Hub — Choose Your Screen</div>
+  </div>
+
+  <div class="conn">
+    <div class="dot" id="dot"></div>
+    <div class="conn-txt" id="connTxt">Checking server...</div>
+  </div>
+
+  <div class="cards">
+    <a class="card card-admin" href="/admin.html">
+      <span class="card-icon">📱</span>
+      <div class="card-name">Admin Panel</div>
+      <div class="card-desc">Control the game — pick players, start timer, reveal answers, manage scores.</div>
+      <span class="card-badge">OPEN ON PHONE</span>
+    </a>
+    <a class="card card-player" href="/player.html">
+      <span class="card-icon">📺</span>
+      <div class="card-name">Live Display</div>
+      <div class="card-desc">Audience screen — shows player name, timer, statements, slot machine draw & leaderboard.</div>
+      <span class="card-badge">OPEN ON LAPTOP / TV</span>
+    </a>
+  </div>
+
+  <div class="hint">
+    <div class="hint-title">📡 Quick Access URLs</div>
+    <div class="hint-row">
+      <span class="hint-device">📺 Display</span>
+      <span class="hint-url">http://localhost:3000/player.html</span>
+    </div>
+    <div class="hint-row">
+      <span class="hint-device">📱 Admin</span>
+      <span class="hint-url" id="adminUrl">http://&lt;your-ip&gt;:3000/admin.html</span>
+    </div>
+    <div class="hint-row">
+      <span class="hint-device">🌐 Hub</span>
+      <span class="hint-url">http://localhost:3000</span>
+    </div>
+  </div>
+
+</div>
+<script>
+  // Show local IP hint
+  const h = location.hostname;
+  const p = location.port || 3000;
+  document.getElementById('adminUrl').textContent = `http://${h}:${p}/admin.html`;
+
+  // Check WS
+  try {
+    const ws = new WebSocket(`ws://${h}:${p}`);
+    ws.onopen = () => {
+      document.getElementById('dot').classList.add('live');
+      document.getElementById('connTxt').textContent = 'Server Online';
+      ws.close();
+    };
+    ws.onerror = () => {
+      document.getElementById('connTxt').textContent = 'Server Offline — run: node server.js';
+    };
+  } catch(e) {}
+</script>
+</body>
+</html>

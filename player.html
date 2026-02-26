@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>2 Truths 1 Lie — Live Display</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --fire:#ff4d00;--gold:#ffd700;--neon:#00ffe0;--void:#06080f;
+  --border:rgba(255,255,255,0.07);--text:#f0f0f0;--dim:rgba(240,240,240,0.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--void);color:var(--text);
+  font-family:'Rajdhani',sans-serif;overflow:hidden;}
+
+/* ── BACKGROUND ── */
+.bg{
+  position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% -10%, rgba(255,77,0,.2) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 90% 90%, rgba(0,255,224,.1) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 30% at 10% 80%, rgba(255,215,0,.06) 0%, transparent 50%),
+    var(--void);
+}
+
+/* Grid scanlines */
+.bg::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.015) 1px, transparent 1px);
+  background-size:60px 60px;
+}
+
+/* ── LAYOUT ── */
+.screen{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── HEADER ── */
+.hdr{
+  text-align:center;padding:20px 20px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.hdr-logo{
+  font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.15em;
+  background:linear-gradient(135deg,var(--fire),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hdr-center{flex:1;text-align:center;}
+.hdr-title{font-family:'Bebas Neue',sans-serif;font-size:3rem;letter-spacing:.2em;
+  background:linear-gradient(135deg,var(--fire),var(--gold),#fff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hdr-sub{font-size:.7rem;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;margin-top:-4px;}
+.level-badge{
+  font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.12em;
+  padding:5px 16px;border-radius:999px;border:1px solid;transition:all .4s;
+  white-space:nowrap;
+}
+.badge-easy{background:rgba(0,255,100,.1);border-color:rgba(0,255,100,.4);color:#00ff64;}
+.badge-medium{background:rgba(255,200,0,.1);border-color:rgba(255,200,0,.4);color:#ffc800;}
+.badge-hard{background:rgba(255,120,0,.1);border-color:rgba(255,120,0,.4);color:#ff7800;}
+.badge-extreme{background:rgba(255,0,60,.12);border-color:rgba(255,0,60,.5);color:#ff003c;animation:pulse-red 1.5s infinite;}
+
+/* ── MAIN CONTENT ── */
+.content{flex:1;display:flex;gap:16px;padding:0 20px 16px;overflow:hidden;min-height:0;}
+
+/* ── LEFT: PLAYER + TIMER + STATEMENTS ── */
+.left{flex:2;display:flex;flex-direction:column;gap:12px;overflow:hidden;min-height:0;}
+
+/* Player Card */
+.player-card{
+  border-radius:20px;
+  background:rgba(255,77,0,.07);
+  border:1.5px solid rgba(255,77,0,.3);
+  padding:16px 20px;text-align:center;
+  flex-shrink:0;
+}
+.player-label{font-size:.6rem;letter-spacing:.25em;color:var(--fire);text-transform:uppercase;font-weight:700;}
+.player-name{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,6vw,5rem);
+  letter-spacing:.06em;line-height:1;
+  background:linear-gradient(135deg,#fff,var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.player-pts{font-family:'Share Tech Mono',monospace;font-size:1.1rem;color:var(--neon);margin-top:4px;}
+
+/* Timer */
+.timer-wrap{text-align:center;flex-shrink:0;}
+.timer-val{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,8vw,7rem);
+  letter-spacing:.08em;line-height:1;transition:color .3s;
+}
+.t-normal{color:var(--neon);}
+.t-warn{color:var(--gold);}
+.t-danger{color:var(--fire);animation:pulse .5s infinite alternate;}
+@keyframes pulse{from{opacity:1}to{opacity:.45}}
+@keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(255,0,60,.4)}50%{box-shadow:0 0 0 10px rgba(255,0,60,0)}}
+.timer-label{font-size:.55rem;letter-spacing:.25em;color:var(--dim);text-transform:uppercase;}
+
+/* Statements */
+.statements{flex:1;display:flex;flex-direction:column;gap:8px;overflow:hidden;min-height:0;}
+.stmt-title{font-size:.6rem;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;text-align:center;flex-shrink:0;}
+.stmts-list{flex:1;display:flex;flex-direction:column;gap:8px;overflow:auto;min-height:0;}
+.stmt{
+  border-radius:14px;
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);
+  padding:12px 16px;
+  transition:all .6s;
+  flex-shrink:0;
+}
+.stmt.truth-r{background:rgba(0,255,100,.07);border-color:rgba(0,255,100,.4);}
+.stmt.lie-r{background:rgba(255,0,60,.07);border-color:rgba(255,0,60,.4);}
+.stmt-letter{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--fire);margin-right:8px;}
+.stmt-text{font-size:clamp(.8rem,1.8vw,1rem);font-weight:600;line-height:1.4;}
+.reveal-tag{display:inline-block;margin-top:6px;padding:2px 10px;border-radius:999px;
+  font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
+.tag-t{background:rgba(0,255,100,.15);color:#00ff64;border:1px solid rgba(0,255,100,.3);}
+.tag-l{background:rgba(255,0,60,.15);color:#ff003c;border:1px solid rgba(255,0,60,.3);}
+.explain-box{padding:10px 14px;border-radius:12px;background:rgba(255,215,0,.06);
+  border:1px solid rgba(255,215,0,.2);font-size:.78rem;color:var(--gold);flex-shrink:0;}
+
+/* ── RIGHT: CHALLENGER + LEADERBOARD ── */
+.right{flex:1;display:flex;flex-direction:column;gap:12px;min-width:0;}
+
+/* Challenger */
+.chal-card{
+  border-radius:16px;background:rgba(0,255,224,.05);
+  border:1px solid rgba(0,255,224,.2);padding:14px;
+  display:none;animation:slideUp .4s ease;
+}
+.chal-card.show{display:block;}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.chal-label{font-size:.58rem;letter-spacing:.2em;color:var(--neon);text-transform:uppercase;font-weight:700;}
+.chal-name{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);line-height:1;}
+.chal-pts{font-size:.7rem;color:var(--dim);margin-top:3px;}
+
+/* Mini Leaderboard */
+.lb-card{border-radius:16px;background:rgba(255,255,255,.02);border:1px solid var(--border);
+  padding:14px;flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.lb-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.15em;
+  color:var(--gold);margin-bottom:8px;text-align:center;flex-shrink:0;}
+.lb-list{flex:1;overflow:auto;display:flex;flex-direction:column;gap:5px;}
+.lb-item{display:flex;align-items:center;padding:7px 10px;border-radius:9px;
+  background:rgba(255,255,255,.02);border:1px solid var(--border);}
+.lb-item.top1{background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.25);}
+.lb-item.top2{background:rgba(192,192,192,.06);border-color:rgba(192,192,192,.15);}
+.lb-item.top3{background:rgba(205,127,50,.06);border-color:rgba(205,127,50,.15);}
+.lb-rank{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;min-width:32px;color:var(--dim);}
+.lb-rank.g{color:var(--gold);}.lb-rank.s{color:#c0c0c0;}.lb-rank.b{color:#cd7f32;}
+.lb-name{flex:1;font-weight:700;font-size:.85rem;}
+.lb-score{font-family:'Share Tech Mono',monospace;font-size:.85rem;color:var(--neon);}
+
+/* Status bar */
+.status-bar{
+  text-align:center;padding:8px 20px;
+  font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.08em;
+  color:var(--dim);flex-shrink:0;
+}
+
+/* ── SLOT MACHINE OVERLAY ── */
+.slot-overlay{
+  position:fixed;inset:0;z-index:900;
+  background:rgba(4,5,12,.95);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+}
+.slot-overlay.show{display:flex;}
+.slot-title{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(1.5rem,4vw,3rem);
+  letter-spacing:.2em;color:var(--dim);margin-bottom:24px;
+  text-transform:uppercase;
+}
+.slot-machine{
+  position:relative;
+  width:min(500px,90vw);
+  border-radius:20px;
+  background:linear-gradient(180deg, #1a0a00, #0a0500);
+  border:3px solid #ff6600;
+  box-shadow:0 0 40px rgba(255,100,0,.4), inset 0 0 30px rgba(0,0,0,.5);
+  padding:10px;
+  overflow:hidden;
+}
+/* decorative lights */
+.slot-lights{display:flex;justify-content:space-between;padding:0 8px;margin-bottom:6px;}
+.slt-light{width:14px;height:14px;border-radius:50%;background:#ff4400;
+  box-shadow:0 0 8px #ff4400;animation:blink-light 0.4s infinite alternate;}
+.slt-light:nth-child(2n){background:#ffd700;box-shadow:0 0 8px #ffd700;animation-delay:.2s;}
+.slt-light:nth-child(3n){background:#00ffe0;box-shadow:0 0 8px #00ffe0;animation-delay:.1s;}
+@keyframes blink-light{from{opacity:.3}to{opacity:1}}
+
+.slot-window{
+  background:#000;
+  border-radius:12px;
+  border:2px solid #ff4400;
+  height:120px;
+  overflow:hidden;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 0 20px rgba(0,0,0,.8);
+}
+.slot-window::before,.slot-window::after{
+  content:'';position:absolute;left:0;right:0;height:35px;z-index:2;pointer-events:none;
+}
+.slot-window::before{top:0;background:linear-gradient(to bottom,#000,transparent);}
+.slot-window::after{bottom:0;background:linear-gradient(to top,#000,transparent);}
+
+.slot-reel{
+  position:absolute;width:100%;
+  display:flex;flex-direction:column;align-items:center;
+  transition:none;
+}
+.slot-item{
+  height:60px;display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.08em;
+  color:#fff;width:100%;text-align:center;padding:0 10px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.slot-item.winner-item{color:var(--gold);text-shadow:0 0 20px rgba(255,215,0,.6);}
+
+/* Selector lines */
+.slot-selector{
+  position:absolute;top:50%;left:0;right:0;height:60px;
+  transform:translateY(-50%);z-index:1;
+  border-top:2px solid var(--fire);border-bottom:2px solid var(--fire);
+  background:rgba(255,77,0,.06);pointer-events:none;
+}
+
+.slot-bottom{display:flex;justify-content:space-between;padding:8px 10px 4px;}
+.slot-coin{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--gold);letter-spacing:.1em;}
+
+/* Winner announcement */
+.winner-announce{
+  margin-top:24px;text-align:center;display:none;
+  animation:explodeIn .6s cubic-bezier(.175,.885,.32,1.275);
+}
+.winner-announce.show{display:block;}
+@keyframes explodeIn{
+  0%{opacity:0;transform:scale(0.2) rotate(-10deg)}
+  60%{transform:scale(1.15) rotate(2deg)}
+  100%{opacity:1;transform:scale(1) rotate(0)}
+}
+.winner-label{font-size:.8rem;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;}
+.winner-name{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,8vw,6rem);
+  letter-spacing:.08em;line-height:1;
+  background:linear-gradient(135deg,var(--fire),var(--gold),#fff,var(--gold));
+  background-size:300%;animation:shimmer 2s linear infinite;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+@keyframes shimmer{0%{background-position:0%}100%{background-position:300%}}
+.winner-sub{font-size:1rem;letter-spacing:.2em;color:var(--neon);text-transform:uppercase;margin-top:8px;
+  animation:fadeIn .5s ease .3s both;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ── CHALLENGE OVERLAY ── */
+.chal-overlay{
+  position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.88);
+  display:none;align-items:center;justify-content:center;flex-direction:column;
+}
+.chal-overlay.show{display:flex;animation:fadeInFast .2s;}
+@keyframes fadeInFast{from{opacity:0}to{opacity:1}}
+.chal-text{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,7vw,5rem);
+  letter-spacing:.15em;color:var(--fire);text-align:center;
+  animation:zoomBounce .5s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes zoomBounce{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+.chal-sub{font-size:.9rem;letter-spacing:.25em;color:var(--neon);text-transform:uppercase;margin-top:10px;}
+
+/* ── SCORE FLASH ── */
+.score-flash{
+  position:fixed;inset:0;z-index:850;display:none;
+  align-items:center;justify-content:center;pointer-events:none;
+}
+.score-flash.show{display:flex;animation:scoreAnim .9s forwards;}
+@keyframes scoreAnim{
+  0%{opacity:0;transform:scale(.4)}
+  30%{opacity:1;transform:scale(1.4)}
+  70%{opacity:1;transform:scale(1.1)}
+  100%{opacity:0;transform:scale(.8)}
+}
+.sf-text{font-family:'Bebas Neue',sans-serif;font-size:clamp(5rem,15vw,12rem);letter-spacing:.05em;}
+.sf-plus{color:#00ff64;text-shadow:0 0 40px rgba(0,255,100,.7);}
+.sf-minus{color:#ff003c;text-shadow:0 0 40px rgba(255,0,60,.7);}
+
+/* ── LEADERBOARD FULLSCREEN ── */
+.lb-full{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(4,5,12,.97);
+  display:none;flex-direction:column;align-items:center;
+  padding:40px 20px;overflow:auto;
+}
+.lb-full.show{display:flex;}
+.lb-full-title{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,5vw,4rem);
+  letter-spacing:.2em;text-align:center;
+  background:linear-gradient(135deg,var(--fire),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:28px;
+}
+.lb-full-list{width:min(700px,95%);display:flex;flex-direction:column;gap:8px;}
+.lb-full-item{
+  display:flex;align-items:center;padding:14px 20px;border-radius:16px;
+  border:1px solid var(--border);background:rgba(255,255,255,.02);
+}
+.lb-full-item.lbf1{background:rgba(255,215,0,.09);border-color:rgba(255,215,0,.35);}
+.lb-full-item.lbf2{background:rgba(192,192,192,.07);border-color:rgba(192,192,192,.2);}
+.lb-full-item.lbf3{background:rgba(205,127,50,.07);border-color:rgba(205,127,50,.2);}
+.lbf-rank{font-family:'Bebas Neue',sans-serif;font-size:2rem;min-width:56px;color:var(--dim);}
+.lbf-name{flex:1;font-weight:700;font-size:1.1rem;}
+.lbf-pts{font-family:'Share Tech Mono',monospace;font-size:1.3rem;color:var(--neon);}
+.lb-full-btn{
+  margin-top:24px;padding:12px 28px;border-radius:12px;
+  background:transparent;border:1.5px solid var(--dim);color:var(--dim);
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;cursor:pointer;
+}
+.lb-full-btn:hover{border-color:var(--text);color:var(--text);}
+
+/* conn indicator */
+.conn{position:fixed;top:8px;right:10px;z-index:999;display:flex;align-items:center;gap:5px;}
+.conn-dot{width:7px;height:7px;border-radius:50%;background:#ff003c;transition:background .3s;}
+.conn-dot.live{background:#00ff64;box-shadow:0 0 5px #00ff64;}
+.conn-txt{font-size:.6rem;letter-spacing:.1em;color:var(--dim);}
+
+/* scrollbar */
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:999px;}
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="conn"><div class="conn-dot" id="connDot"></div><div class="conn-txt" id="connTxt">CONNECTING</div></div>
+
+<!-- MAIN SCREEN -->
+<div class="screen" id="gameScreen">
+  <div class="hdr">
+    <div style="min-width:120px;">
+      <div class="hdr-logo">2 TRUTHS 1 LIE</div>
+      <div style="font-size:.55rem;letter-spacing:.15em;color:var(--dim);">LIVE COGNITION CHALLENGE</div>
+    </div>
+    <div class="hdr-center">
+      <div class="hdr-title">IDENTIFY THE LIE</div>
+      <div class="hdr-sub">Round <span id="roundNum">—</span></div>
+    </div>
+    <div style="min-width:120px;text-align:right;">
+      <div class="level-badge badge-easy" id="levelBadge">EASY</div>
+      <div style="margin-top:6px;font-size:.6rem;color:var(--dim);" id="ptsInfo">Player +10 · Chall +5</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- LEFT -->
+    <div class="left">
+      <div class="player-card">
+        <div class="player-label">Now Playing</div>
+        <div class="player-name" id="playerName">—</div>
+        <div class="player-pts" id="playerPts">0 pts</div>
+      </div>
+
+      <div class="timer-wrap">
+        <div class="timer-val t-normal" id="timerVal">—</div>
+        <div class="timer-label">seconds remaining</div>
+      </div>
+
+      <div class="statements">
+        <div class="stmt-title">Identify the LIE below</div>
+        <div class="stmts-list" id="stmtsList">
+          <div class="stmt"><span class="stmt-letter">A</span><span class="stmt-text" style="color:var(--dim)">Waiting for question…</span></div>
+          <div class="stmt"><span class="stmt-letter">B</span><span class="stmt-text" style="color:var(--dim)">—</span></div>
+          <div class="stmt"><span class="stmt-letter">C</span><span class="stmt-text" style="color:var(--dim)">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+      <div class="chal-card" id="chalCard">
+        <div class="chal-label">⚔️ Challenger</div>
+        <div class="chal-name" id="chalName">—</div>
+        <div class="chal-pts" id="chalPts"></div>
+      </div>
+
+      <div class="lb-card">
+        <div class="lb-title">🏆 LIVE SCORES</div>
+        <div class="lb-list" id="miniLb"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar" id="statusBar">Waiting for admin to start...</div>
+</div>
+
+<!-- SLOT MACHINE OVERLAY -->
+<div class="slot-overlay" id="slotOverlay">
+  <div class="slot-title">🎲 SELECTING PLAYER</div>
+  <div class="slot-machine">
+    <div class="slot-lights" id="slotLights"></div>
+    <div class="slot-window">
+      <div class="slot-selector"></div>
+      <div class="slot-reel" id="slotReel"></div>
+    </div>
+    <div class="slot-bottom">
+      <div class="slot-coin">🪙 LUCKY DRAW</div>
+      <div class="slot-coin" id="slotRound">ROUND —</div>
+    </div>
+  </div>
+  <div class="winner-announce" id="winnerAnnounce">
+    <div class="winner-label">🎯 Selected Player</div>
+    <div class="winner-name" id="winnerName">—</div>
+    <div class="winner-sub">Get Ready! 🔥</div>
+  </div>
+</div>
+
+<!-- CHALLENGE OVERLAY -->
+<div class="chal-overlay" id="chalOverlay">
+  <div class="chal-text">⚔️ CHALLENGE<br>ACCEPTED!</div>
+  <div class="chal-sub" id="chalOverlaySub">Stepping up to challenge...</div>
+</div>
+
+<!-- SCORE FLASH -->
+<div class="score-flash" id="scoreFlash">
+  <div class="sf-text" id="sfText"></div>
+</div>
+
+<!-- FULL LEADERBOARD -->
+<div class="lb-full" id="lbFull">
+  <div class="lb-full-title">🏆 FINAL STANDINGS</div>
+  <div class="lb-full-list" id="lbFullList"></div>
+  <button class="lb-full-btn" onclick="sendMsg('toggleLeaderboard', false)">↩ BACK TO GAME</button>
+</div>
+
+<script>
+let ws, state = {};
+let slotInterval = null;
+let slotSpeed = 60;
+let slotPos = 0;
+let slotNames = [];
+let slotTarget = '';
+let slotPhase = 'idle'; // idle / spin / slowdown / done
+let slotItemH = 60;
+
+/* ─── WEBSOCKET ─── */
+function connect() {
+  const host = location.hostname;
+  const port = location.port || 3000;
+  ws = new WebSocket(`ws://${host}:${port}`);
+
+  ws.onopen = () => {
+    document.getElementById('connDot').classList.add('live');
+    document.getElementById('connTxt').textContent = 'LIVE';
+  };
+  ws.onclose = () => {
+    document.getElementById('connDot').classList.remove('live');
+    document.getElementById('connTxt').textContent = 'OFFLINE';
+    setTimeout(connect, 2000);
+  };
+  ws.onerror = () => ws.close();
+  ws.onmessage = (e) => {
+    try {
+      const msg = JSON.parse(e.data);
+      if(msg.type === 'state') applyState(msg.data);
+    } catch(err) {}
+  };
+}
+
+function sendMsg(type, data) {
+  if(ws && ws.readyState === 1) ws.send(JSON.stringify({type,data}));
+}
+
+/* ─── STATE APPLY ─── */
+function applyState(newState) {
+  const prev = state;
+  state = newState;
+
+  // Slot animation trigger
+  if(state.slotAnimation && state.slotAnimation.spinning && slotPhase === 'idle') {
+    startSlotMachine(state.slotAnimation.names, state.slotAnimation.result);
+  }
+  if(!state.slotAnimation && slotPhase !== 'idle') {
+    // Server says stop, we handle it in the slot machine itself
+  }
+
+  // Challenge animation
+  if(state.challengeAnim && !prev.challengeAnim) {
+    showChallengeAnim(state.challenger);
+  }
+
+  // Score flash
+  if(state.scoreFlash && (!prev.scoreFlash || prev.scoreFlash.text !== state.scoreFlash.text)) {
+    showScoreFlash(state.scoreFlash.text, state.scoreFlash.positive);
+  }
+
+  // Leaderboard fullscreen
+  const lbEl = document.getElementById('lbFull');
+  if(state.showLeaderboard) {
+    lbEl.classList.add('show');
+    renderFullLb();
+  } else {
+    lbEl.classList.remove('show');
+  }
+
+  updateUI();
+}
+
+function updateUI() {
+  const s = state;
+
+  // Level badge
+  const badge = document.getElementById('levelBadge');
+  badge.textContent = (s.stage||'easy').toUpperCase();
+  badge.className = 'level-badge badge-' + (s.stage||'easy');
+
+  // Pts info
+  const stg = {easy:{pts:10,chalPts:5},medium:{pts:20,chalPts:10},hard:{pts:30,chalPts:15},extreme:{pts:40,chalPts:20}};
+  const st = stg[s.stage] || stg.easy;
+  document.getElementById('ptsInfo').textContent = `Player +${st.pts} · Chall +${st.chalPts}`;
+
+  // Round
+  document.getElementById('roundNum').textContent = s.round || '—';
+
+  // Player
+  if(s.currentPlayer && s.players) {
+    const p = s.players.find(pl => pl.name === s.currentPlayer);
+    document.getElementById('playerName').textContent = s.currentPlayer;
+    document.getElementById('playerPts').textContent = (p ? p.pts : 0) + ' pts';
+  } else {
+    document.getElementById('playerName').textContent = '—';
+    document.getElementById('playerPts').textContent = '0 pts';
+  }
+
+  // Timer
+  const tv = s.timerVal !== undefined ? s.timerVal : '—';
+  const timerEl = document.getElementById('timerVal');
+  timerEl.textContent = tv;
+  if(typeof tv === 'number') {
+    timerEl.className = 'timer-val ' + (tv > 20 ? 't-normal' : tv > 10 ? 't-warn' : 't-danger');
+  } else {
+    timerEl.className = 'timer-val t-normal';
+  }
+
+  // Status
+  document.getElementById('statusBar').textContent = s.status || '';
+
+  // Statements
+  renderStatements();
+
+  // Challenger card
+  const chalCard = document.getElementById('chalCard');
+  if(s.challenger) {
+    chalCard.classList.add('show');
+    document.getElementById('chalName').textContent = s.challenger;
+    document.getElementById('chalPts').textContent = `Win: +${st.chalPts} | Lose: −${st.chalPts}`;
+  } else {
+    chalCard.classList.remove('show');
+  }
+
+  // Mini leaderboard
+  renderMiniLb();
+}
+
+function renderStatements() {
+  const el = document.getElementById('stmtsList');
+  const q = state.currentSet;
+  if(!q) {
+    el.innerHTML = `
+      <div class="stmt"><span class="stmt-letter">A</span><span class="stmt-text" style="color:var(--dim)">Waiting for question…</span></div>
+      <div class="stmt"><span class="stmt-letter">B</span><span class="stmt-text" style="color:var(--dim)">—</span></div>
+      <div class="stmt"><span class="stmt-letter">C</span><span class="stmt-text" style="color:var(--dim)">—</span></div>`;
+    return;
+  }
+  const keys = ['a','b','c'], labels = ['A','B','C'];
+  let html = keys.map((k,i) => {
+    let cls = 'stmt', tag = '';
+    if(state.revealed) {
+      if(k === q.lie) { cls += ' lie-r'; tag = '<div style="margin-top:5px"><span class="reveal-tag tag-l">❌ THE LIE</span></div>'; }
+      else { cls += ' truth-r'; tag = '<div style="margin-top:5px"><span class="reveal-tag tag-t">✅ TRUTH</span></div>'; }
+    }
+    return `<div class="${cls}"><span class="stmt-letter">${labels[i]}</span><span class="stmt-text">${q[k]}</span>${tag}</div>`;
+  }).join('');
+  if(state.revealed && q.explain) {
+    html += `<div class="explain-box">💡 ${q.explain}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderMiniLb() {
+  if(!state.players) return;
+  const sorted = [...state.players].sort((a,b) => b.pts - a.pts);
+  const medals = ['🥇','🥈','🥉'];
+  const topCls = ['top1','top2','top3'];
+  const rankCls = ['g','s','b'];
+  document.getElementById('miniLb').innerHTML = sorted.slice(0,6).map((p,i) => `
+    <div class="lb-item ${topCls[i]||''}">
+      <div class="lb-rank ${rankCls[i]||''}">${medals[i]||'#'+(i+1)}</div>
+      <div class="lb-name">${p.name}${state.currentPlayer===p.name?' 🎯':''}</div>
+      <div class="lb-score">${p.pts}</div>
+    </div>`).join('');
+}
+
+function renderFullLb() {
+  if(!state.players) return;
+  const sorted = [...state.players].sort((a,b) => b.pts - a.pts);
+  const medals = ['🥇','🥈','🥉'];
+  const cls = ['lbf1','lbf2','lbf3'];
+  document.getElementById('lbFullList').innerHTML = sorted.map((p,i) => `
+    <div class="lb-full-item ${cls[i]||''}">
+      <div class="lbf-rank">${medals[i]||'#'+(i+1)}</div>
+      <div>
+        <div class="lbf-name">${p.name}${state.currentPlayer===p.name?' 🎯':''}</div>
+        <div style="font-size:.65rem;color:var(--dim);">Challenges: ${p.challengeCount}</div>
+      </div>
+      <div class="lbf-pts">${p.pts}</div>
+    </div>`).join('');
+}
+
+/* ─── SLOT MACHINE ─── */
+function buildSlotLights(count) {
+  const el = document.getElementById('slotLights');
+  el.innerHTML = Array(count).fill(0).map(() => '<div class="slt-light"></div>').join('');
+}
+
+function startSlotMachine(names, result) {
+  if(!names || !names.length) return;
+  slotPhase = 'spin';
+  slotTarget = result;
+  slotSpeed = 40; // ms per step initially fast
+
+  // Build the reel with many repeated names
+  const reel = document.getElementById('slotReel');
+  const repeated = [];
+  for(let i = 0; i < 30; i++) repeated.push(...names);
+  // Add the winner at the end
+  repeated.push(result);
+
+  slotNames = repeated;
+  slotPos = 0;
+
+  reel.innerHTML = slotNames.map((n,i) =>
+    `<div class="slot-item" data-idx="${i}">${n}</div>`
+  ).join('');
+
+  buildSlotLights(12);
+
+  document.getElementById('slotOverlay').classList.add('show');
+  document.getElementById('winnerAnnounce').classList.remove('show');
+  document.getElementById('winnerName').textContent = result;
+  document.getElementById('slotRound').textContent = 'ROUND ' + ((state.round||0)+1);
+
+  // Centre the reel initially
+  reel.style.transition = 'none';
+  reel.style.top = '30px';
+
+  let step = 0;
+  const totalSteps = slotNames.length - 1;
+  const slowdownStart = totalSteps - 12;
+
+  clearInterval(slotInterval);
+  slotInterval = setInterval(() => {
+    step++;
+    if(step >= totalSteps) {
+      // Land on winner
+      clearInterval(slotInterval);
+      slotPhase = 'done';
+      reel.style.top = (30 - step * slotItemH) + 'px';
+      // Mark winner
+      const items = reel.querySelectorAll('.slot-item');
+      if(items[step]) items[step].classList.add('winner-item');
+      // Show announcement
+      setTimeout(() => {
+        document.getElementById('winnerAnnounce').classList.add('show');
+      }, 300);
+      // Auto-dismiss overlay when state updates (server will clear slotAnimation)
+      setTimeout(() => {
+        document.getElementById('slotOverlay').classList.remove('show');
+        slotPhase = 'idle';
+      }, 3500);
+      return;
+    }
+
+    // Animate
+    reel.style.top = (30 - step * slotItemH) + 'px';
+
+    // Slow down near end
+    if(step > slowdownStart) {
+      const progress = (step - slowdownStart) / 12;
+      slotSpeed = 40 + Math.floor(progress * 220);
+      // Restart interval with new speed
+      clearInterval(slotInterval);
+      slotInterval = setInterval(arguments.callee, slotSpeed);
+    }
+  }, slotSpeed);
+}
+
+/* ─── CHALLENGE ANIM ─── */
+function showChallengeAnim(name) {
+  const el = document.getElementById('chalOverlay');
+  document.getElementById('chalOverlaySub').textContent = (name||'Someone') + ' steps up!';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* ─── SCORE FLASH ─── */
+function showScoreFlash(text, positive) {
+  const el = document.getElementById('scoreFlash');
+  const t = document.getElementById('sfText');
+  t.textContent = text;
+  t.className = 'sf-text ' + (positive ? 'sf-plus' : 'sf-minus');
+  el.classList.remove('show');
+  void el.offsetWidth; // reflow
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 950);
+}
+
+connect();
+</script>
+</body>
+</html>player.html

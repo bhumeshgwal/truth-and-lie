@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>2T1L — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --fire:#ff4d00;--gold:#ffd700;--neon:#00ffe0;--void:#06080f;
+  --card:#0d1117;--border:rgba(255,255,255,0.08);--text:#f0f0f0;--dim:rgba(240,240,240,0.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--void);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+
+/* ─ TOP BAR ─ */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(6,8,15,0.97);border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;
+}
+.topbar-logo{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.12em;
+  background:linear-gradient(135deg,var(--fire),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.conn-dot{width:8px;height:8px;border-radius:50%;background:#ff003c;transition:background .3s;}
+.conn-dot.live{background:#00ff64;box-shadow:0 0 6px #00ff64;}
+.conn-label{font-size:.65rem;color:var(--dim);letter-spacing:.1em;margin-left:5px;}
+
+/* ─ TABS ─ */
+.tabs{display:flex;border-bottom:1px solid var(--border);}
+.tab{flex:1;padding:11px 4px;text-align:center;font-family:'Bebas Neue',sans-serif;
+  font-size:.95rem;letter-spacing:.08em;cursor:pointer;border:none;
+  background:transparent;color:var(--dim);border-bottom:2px solid transparent;transition:all .2s;}
+.tab.active{color:var(--fire);border-bottom-color:var(--fire);}
+
+.panel{display:none;padding:12px;padding-bottom:80px;}
+.panel.active{display:block;}
+
+/* ─ SECTION ─ */
+.sec{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.1em;color:var(--fire);margin-bottom:10px;}
+
+/* ─ STAGE SELECTOR ─ */
+.stage-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.sbtn{padding:10px;border-radius:9px;border:1.5px solid;font-family:'Bebas Neue',sans-serif;
+  font-size:.95rem;letter-spacing:.07em;cursor:pointer;background:transparent;transition:all .2s;color:#fff;}
+.s-easy{border-color:rgba(0,255,100,.35);color:#00ff64;}.s-easy.on,.s-easy:active{background:rgba(0,255,100,.18);}
+.s-med{border-color:rgba(255,200,0,.35);color:#ffc800;}.s-med.on,.s-med:active{background:rgba(255,200,0,.18);}
+.s-hard{border-color:rgba(255,120,0,.35);color:#ff7800;}.s-hard.on,.s-hard:active{background:rgba(255,120,0,.18);}
+.s-ext{border-color:rgba(255,0,60,.35);color:#ff003c;}.s-ext.on,.s-ext:active{background:rgba(255,0,60,.18);}
+
+/* ─ INPUTS ─ */
+.row{display:flex;gap:7px;margin-bottom:9px;}
+.inp{flex:1;padding:9px 12px;border-radius:9px;background:rgba(255,255,255,.05);
+  border:1px solid var(--border);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:.88rem;}
+.inp:focus{outline:none;border-color:rgba(255,77,0,.5);}
+.inp::placeholder{color:var(--dim);}
+textarea.inp{resize:vertical;min-height:54px;}
+
+/* ─ BUTTONS ─ */
+.btn{padding:9px 16px;border-radius:9px;font-family:'Bebas Neue',sans-serif;
+  font-size:.9rem;letter-spacing:.07em;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-fire{background:var(--fire);color:#fff;}.btn-fire:active{background:#ff6633;transform:scale(.97);}
+.btn-neon{background:transparent;border:1.5px solid var(--neon);color:var(--neon);}
+.btn-neon:active{background:rgba(0,255,224,.12);}
+.btn-gold{background:transparent;border:1.5px solid var(--gold);color:var(--gold);}
+.btn-gold:active{background:rgba(255,215,0,.12);}
+.btn-ghost{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--dim);font-family:'Rajdhani',sans-serif;}
+.btn-ghost:active{background:rgba(255,255,255,.1);}
+.btn-danger{background:rgba(255,0,60,.1);border:1px solid rgba(255,0,60,.3);color:#ff003c;font-family:'Rajdhani',sans-serif;}
+.btn-sm{padding:6px 12px;font-size:.78rem;}
+.btn-full{width:100%;text-align:center;display:block;}
+.btn-big{padding:13px;font-size:1.05rem;border-radius:11px;}
+
+/* ─ PLAYER LIST ─ */
+.plist{display:flex;flex-direction:column;gap:5px;max-height:220px;overflow-y:auto;}
+.pitem{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 11px;border-radius:9px;background:rgba(255,255,255,.03);border:1px solid var(--border);}
+.pitem.used{opacity:.4;}
+.pitem.current{background:rgba(255,77,0,.1);border-color:rgba(255,77,0,.35);}
+.pname{font-weight:700;font-size:.86rem;}
+.ppts{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--neon);}
+.pacts{display:flex;gap:4px;align-items:center;}
+.pbtn{width:28px;height:28px;border-radius:6px;border:none;font-size:.82rem;cursor:pointer;
+  font-weight:900;font-family:'Rajdhani',sans-serif;display:flex;align-items:center;justify-content:center;}
+.pi{background:rgba(0,255,100,.15);color:#00ff64;}
+.pd{background:rgba(255,0,60,.15);color:#ff003c;}
+
+/* ─ GAME FLOW ─ */
+.flow{display:flex;flex-direction:column;gap:7px;}
+.divider{height:1px;background:linear-gradient(to right,transparent,rgba(255,255,255,.07),transparent);margin:8px 0;}
+
+/* ─ QSET LIST ─ */
+.qlist{display:flex;flex-direction:column;gap:7px;max-height:240px;overflow-y:auto;margin-bottom:10px;}
+.qitem{border-radius:11px;background:rgba(255,255,255,.02);border:1px solid var(--border);
+  padding:11px;cursor:pointer;transition:all .2s;}
+.qitem.sel{background:rgba(255,77,0,.08);border-color:rgba(255,77,0,.4);}
+.qitem-head{font-weight:700;font-size:.8rem;margin-bottom:5px;display:flex;justify-content:space-between;}
+.qitem-body{font-size:.7rem;color:var(--dim);line-height:1.6;}
+
+/* ─ CHALLENGER CHIPS ─ */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;}
+.chip{padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.04);
+  border:1px solid var(--border);font-size:.76rem;font-weight:600;cursor:pointer;
+  transition:all .2s;font-family:'Rajdhani',sans-serif;}
+.chip:active{background:rgba(0,255,224,.12);border-color:rgba(0,255,224,.4);color:var(--neon);}
+.chip.sel{background:rgba(0,255,224,.15);border-color:var(--neon);color:var(--neon);}
+.chip.blocked{opacity:.3;pointer-events:none;}
+
+/* ─ FORM LABELS ─ */
+.flabel{font-size:.67rem;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-bottom:3px;}
+.fbadge-t{display:inline-block;padding:4px 9px;border-radius:7px;background:rgba(0,255,100,.1);
+  border:1px solid rgba(0,255,100,.3);color:#00ff64;font-size:.67rem;font-weight:800;white-space:nowrap;}
+.fbadge-l{display:inline-block;padding:4px 9px;border-radius:7px;background:rgba(255,0,60,.1);
+  border:1px solid rgba(255,0,60,.3);color:#ff003c;font-size:.67rem;font-weight:800;white-space:nowrap;}
+
+/* ─ MANUAL SCORE ─ */
+.mrow{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);}
+.mname{font-weight:700;font-size:.82rem;flex:1;}
+.mpts{font-family:'Share Tech Mono',monospace;color:var(--neon);font-size:.78rem;min-width:44px;text-align:right;}
+
+/* ─ LEADERBOARD ─ */
+.lb-item{display:flex;align-items:center;padding:10px 13px;border-radius:12px;
+  background:rgba(255,255,255,.02);border:1px solid var(--border);margin-bottom:7px;}
+.lb-item.r1{background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.3);}
+.lb-item.r2{background:rgba(192,192,192,.06);border-color:rgba(192,192,192,.2);}
+.lb-item.r3{background:rgba(205,127,50,.06);border-color:rgba(205,127,50,.2);}
+.lb-rank{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;min-width:40px;color:var(--dim);}
+.lb-rank.g{color:var(--gold);}.lb-rank.s{color:#c0c0c0;}.lb-rank.b{color:#cd7f32;}
+.lb-name{flex:1;font-weight:700;}
+.lb-pts{font-family:'Share Tech Mono',monospace;font-size:1rem;color:var(--neon);}
+
+/* ─ CURRENT ROUND DISPLAY ─ */
+.round-card{background:linear-gradient(135deg,rgba(255,77,0,.1),rgba(255,215,0,.05));
+  border:1.5px solid rgba(255,77,0,.3);border-radius:14px;padding:13px;margin-bottom:10px;text-align:center;}
+.rc-label{font-size:.6rem;letter-spacing:.2em;color:var(--fire);text-transform:uppercase;font-weight:700;}
+.rc-name{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.06em;
+  background:linear-gradient(135deg,#fff,var(--gold));-webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+.rc-pts{font-family:'Share Tech Mono',monospace;font-size:.9rem;color:var(--neon);margin-top:2px;}
+.rc-status{font-size:.72rem;color:var(--dim);margin-top:5px;}
+
+/* ─ TOAST ─ */
+.toast{position:fixed;top:56px;left:50%;transform:translateX(-50%) translateY(-8px);
+  z-index:500;opacity:0;transition:all .22s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast-inner{padding:8px 18px;border-radius:999px;font-weight:700;font-size:.8rem;
+  font-family:'Rajdhani',sans-serif;white-space:nowrap;}
+
+/* ─ CHALLENGER INFO BOX ─ */
+.chal-box{display:none;margin-top:10px;padding:11px;border-radius:11px;
+  background:rgba(0,255,224,.04);border:1px solid rgba(0,255,224,.2);}
+.chal-box.show{display:block;}
+.chal-box-name{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--gold);}
+.chal-box-info{font-size:.68rem;color:var(--dim);margin-bottom:7px;}
+.chal-btns{display:flex;gap:7px;flex-wrap:wrap;}
+
+/* ─ RANDOM BTN ─ */
+.random-btn{
+  width:100%;padding:15px;border-radius:13px;
+  background:linear-gradient(135deg,#ff4d00,#ff8c00);
+  border:none;color:#fff;font-family:'Bebas Neue',sans-serif;
+  font-size:1.2rem;letter-spacing:.1em;cursor:pointer;
+  box-shadow:0 4px 20px rgba(255,77,0,.35);
+  transition:all .2s;margin-bottom:9px;
+}
+.random-btn:active{transform:scale(.97);box-shadow:0 2px 10px rgba(255,77,0,.2);}
+.random-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* scrollbar */
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:999px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">2T1L · ADMIN</div>
+  <div style="display:flex;align-items:center;gap:6px;">
+    <div class="conn-dot" id="connDot"></div>
+    <div class="conn-label" id="connLabel">CONNECTING...</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('game',this)">🎮 GAME</button>
+  <button class="tab" onclick="switchTab('players',this)">👥 PLAYERS</button>
+  <button class="tab" onclick="switchTab('questions',this)">❓ Q-SETS</button>
+  <button class="tab" onclick="switchTab('board',this)">🏆 BOARD</button>
+</div>
+
+<div id="toast"><div class="toast-inner" id="toastInner"></div></div>
+
+<!-- ══ GAME TAB ══ -->
+<div class="panel active" id="panel-game">
+
+  <div class="sec">
+    <div class="sec-title">⚡ Difficulty</div>
+    <div class="stage-grid">
+      <button class="sbtn s-easy on" id="sb-easy"   onclick="send('setStage','easy')">EASY +10</button>
+      <button class="sbtn s-med"     id="sb-medium" onclick="send('setStage','medium')">MEDIUM +20</button>
+      <button class="sbtn s-hard"    id="sb-hard"   onclick="send('setStage','hard')">HARD +30</button>
+      <button class="sbtn s-ext"     id="sb-extreme"onclick="send('setStage','extreme')">EXTREME +40</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">🎯 Current Round</div>
+    <div class="round-card">
+      <div class="rc-label">Now Playing</div>
+      <div class="rc-name" id="rcName">—</div>
+      <div class="rc-pts" id="rcPts">0 pts</div>
+      <div class="rc-status" id="rcStatus">Waiting...</div>
+    </div>
+
+    <button class="random-btn" id="btnRandom" onclick="pickRandom()">🎲 RANDOM PICK</button>
+
+    <div class="flow" id="flowBtns">
+      <button class="btn btn-fire btn-big btn-full" id="btn-startTimer"  onclick="send('startTimer', parseInt(document.getElementById('timerSec').value)||60)">▶ START TIMER</button>
+      <button class="btn btn-gold btn-big btn-full" id="btn-lockAnswer"  onclick="send('lockAnswer')">🔒 LOCK ANSWER</button>
+      <button class="btn btn-neon btn-big btn-full" id="btn-reveal"      onclick="send('revealAnswer')" style="display:none">👁 REVEAL ANSWER</button>
+      <button class="btn btn-fire btn-big btn-full" id="btn-award"       onclick="send('awardParticipant')" style="display:none">✅ CORRECT +PTS</button>
+      <button class="btn btn-ghost btn-big btn-full" id="btn-wrong"      onclick="send('participantWrong')" style="display:none">❌ WRONG</button>
+      <button class="btn btn-ghost btn-full"         id="btn-next"       onclick="send('nextRound')" style="display:none">⏭ NEXT ROUND</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
+      <div>
+        <div class="flabel">Timer (sec)</div>
+        <input type="number" class="inp" id="timerSec" value="60" min="5" max="300" style="width:72px;"/>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="send('stopTimer')">⏹ Stop</button>
+      <button class="btn btn-ghost btn-sm" onclick="send('resetTimer', parseInt(document.getElementById('timerSec').value)||60)">↩ Reset</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">⚔️ Challenger</div>
+    <div style="font-size:.7rem;color:var(--dim);margin-bottom:8px;">Tap to set challenger (max 2/round):</div>
+    <div class="chips" id="chalChips"><div style="color:var(--dim);font-size:.76rem;">Add players first</div></div>
+    <div class="row">
+      <input type="text" class="inp" id="customChal" placeholder="Or type name manually..."/>
+      <button class="btn btn-neon btn-sm" onclick="setCustomChallenger()">SET</button>
+    </div>
+    <div class="chal-box" id="chalBox">
+      <div style="font-size:.65rem;color:var(--neon);text-transform:uppercase;letter-spacing:.1em;">Current Challenger</div>
+      <div class="chal-box-name" id="chalBoxName">—</div>
+      <div class="chal-box-info" id="chalBoxInfo"></div>
+      <div class="chal-btns">
+        <button class="btn btn-neon btn-sm" onclick="send('challengerCorrect')">✅ CORRECT +pts</button>
+        <button class="btn btn-danger btn-sm" onclick="send('challengerWrong')">❌ WRONG −pts</button>
+        <button class="btn btn-ghost btn-sm" onclick="send('clearChallenger')">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">📺 Display Control</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-neon btn-full" onclick="send('toggleLeaderboard', true)">🏆 SHOW LEADERBOARD</button>
+      <button class="btn btn-ghost btn-full" onclick="send('toggleLeaderboard', false)">↩ BACK TO GAME</button>
+    </div>
+  </div>
+
+  <div class="sec" style="border-color:rgba(255,0,60,.15);">
+    <div class="sec-title" style="color:#ff003c;">💀 Danger</div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;">
+      <button class="btn btn-danger" onclick="dangerReset()">Reset Scores</button>
+      <button class="btn btn-danger" onclick="dangerClear()">Clear Players</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PLAYERS TAB ══ -->
+<div class="panel" id="panel-players">
+  <div class="sec">
+    <div class="sec-title">👥 Add Participant</div>
+    <div class="row">
+      <input type="text" class="inp" id="addNameInp" placeholder="Name..." onkeydown="if(event.key==='Enter')addPlayer()"/>
+      <button class="btn btn-fire" onclick="addPlayer()">ADD</button>
+    </div>
+    <div class="plist" id="playersList">
+      <div style="color:var(--dim);font-size:.8rem;text-align:center;padding:10px;">No players yet</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">🔧 Manual Score Adjust</div>
+    <div id="manualList"><div style="color:var(--dim);font-size:.8rem;">Add players first</div></div>
+  </div>
+</div>
+
+<!-- ══ QUESTIONS TAB ══ -->
+<div class="panel" id="panel-questions">
+  <div class="sec">
+    <div class="sec-title">❓ Question Sets</div>
+    <div class="qlist" id="qsetList"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-title">+ Add Question Set</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div>
+        <div class="flabel">Statement A — Truth</div>
+        <div class="row"><input type="text" class="inp" id="qA" placeholder="First truth..."/><span class="fbadge-t">TRUTH</span></div>
+      </div>
+      <div>
+        <div class="flabel">Statement B — Truth</div>
+        <div class="row"><input type="text" class="inp" id="qB" placeholder="Second truth..."/><span class="fbadge-t">TRUTH</span></div>
+      </div>
+      <div>
+        <div class="flabel">Statement C — The Lie</div>
+        <div class="row"><input type="text" class="inp" id="qC" placeholder="The lie..." style="border-color:rgba(255,0,60,.3)!important"/><span class="fbadge-l">LIE</span></div>
+      </div>
+      <div>
+        <div class="flabel">Explanation (optional)</div>
+        <textarea class="inp" id="qExplain" placeholder="Shown after reveal..."></textarea>
+      </div>
+      <button class="btn btn-fire btn-full" onclick="addQset()">ADD QUESTION SET</button>
+    </div>
+  </div>
+  <div class="sec">
+    <button class="btn btn-danger btn-full" onclick="send('resetQsets')">↩ Reset to Default Q-Sets</button>
+  </div>
+</div>
+
+<!-- ══ BOARD TAB ══ -->
+<div class="panel" id="panel-board">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.12em;text-align:center;
+    background:linear-gradient(135deg,var(--fire),var(--gold));-webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px;padding-top:2px;">
+    🏆 LEADERBOARD
+  </div>
+  <div id="fullLb"><div style="text-align:center;color:var(--dim);padding:2rem;">No players yet</div></div>
+  <div class="divider"></div>
+  <button class="btn btn-ghost btn-full" onclick="exportCSV()">📥 Export CSV</button>
+</div>
+
+<script>
+let ws, state = {};
+let toastTimer;
+
+/* ─ WS ─ */
+function connect() {
+  const host = location.hostname;
+  const port = location.port || 3000;
+  ws = new WebSocket(`ws://${host}:${port}`);
+
+  ws.onopen = () => {
+    document.getElementById('connDot').classList.add('live');
+    document.getElementById('connLabel').textContent = 'LIVE';
+    toast('Connected!', 'neon');
+  };
+
+  ws.onclose = () => {
+    document.getElementById('connDot').classList.remove('live');
+    document.getElementById('connLabel').textContent = 'OFFLINE';
+    setTimeout(connect, 2000);
+  };
+
+  ws.onerror = () => ws.close();
+
+  ws.onmessage = (e) => {
+    try {
+      const msg = JSON.parse(e.data);
+      if(msg.type === 'state') { state = msg.data; applyState(); }
+    } catch(err) {}
+  };
+}
+
+function send(type, data) {
+  if(ws && ws.readyState === 1) ws.send(JSON.stringify({ type, data }));
+  else toast('Not connected!', 'error');
+}
+
+/* ─ STATE ─ */
+function applyState() {
+  // Stage buttons
+  ['easy','medium','hard','extreme'].forEach(s => {
+    const el = document.getElementById('sb-'+s);
+    if(el) el.classList.toggle('on', state.stage === s);
+  });
+
+  // Round card
+  if(state.currentPlayer) {
+    const p = state.players.find(pl => pl.name === state.currentPlayer);
+    document.getElementById('rcName').textContent = state.currentPlayer;
+    document.getElementById('rcPts').textContent = p ? p.pts + ' pts' : '0 pts';
+  } else {
+    document.getElementById('rcName').textContent = '—';
+    document.getElementById('rcPts').textContent = '0 pts';
+  }
+  document.getElementById('rcStatus').textContent = state.status || '';
+
+  // Random btn
+  const rnd = document.getElementById('btnRandom');
+  rnd.disabled = state.gamePhase === 'spinning';
+
+  // Game flow buttons
+  updateFlowBtns();
+
+  // Challenger section
+  updateChalSection();
+
+  // Renders
+  renderPlayersList();
+  renderManualList();
+  renderQsets();
+  renderFullLb();
+}
+
+function updateFlowBtns() {
+  const p = state.gamePhase;
+  const S = id => document.getElementById(id);
+  const show = (id, v) => { const el=S(id); if(el) el.style.display = v ? 'block':'none'; };
+  show('btn-startTimer', p === 'idle' || p === 'playing');
+  show('btn-lockAnswer', p === 'playing');
+  show('btn-reveal',     p === 'locked');
+  show('btn-award',      p === 'revealed');
+  show('btn-wrong',      p === 'revealed');
+  show('btn-next',       p === 'done');
+}
+
+function updateChalSection() {
+  const avail = state.players ? state.players.filter(p => p.name !== state.currentPlayer) : [];
+  const el = document.getElementById('chalChips');
+  if(!avail.length) {
+    el.innerHTML = '<div style="color:var(--dim);font-size:.76rem;">Add players first</div>';
+  } else {
+    el.innerHTML = avail.map(p => {
+      const blocked = p.challengeCount >= 2;
+      const sel = state.challenger === p.name;
+      return `<button class="chip ${blocked?'blocked':''} ${sel?'sel':''}"
+        onclick="setChallenger('${escQ(p.name)}')"
+        ${blocked?'disabled':''}>
+        ${p.name} ${blocked?'🚫':'('+p.challengeCount+'/2)'}
+      </button>`;
+    }).join('');
+  }
+
+  const box = document.getElementById('chalBox');
+  if(state.challenger) {
+    box.classList.add('show');
+    document.getElementById('chalBoxName').textContent = state.challenger;
+    const st = {easy:{chalPts:5,chalFail:5},medium:{chalPts:10,chalFail:10},hard:{chalPts:15,chalFail:15},extreme:{chalPts:20,chalFail:20}};
+    const s = st[state.stage] || st.easy;
+    document.getElementById('chalBoxInfo').textContent = `Win: +${s.chalPts} | Lose: −${s.chalFail}`;
+  } else {
+    box.classList.remove('show');
+  }
+}
+
+function escQ(s) { return s.replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+
+function setChallenger(name) {
+  send('selectChallenger', name);
+}
+
+function setCustomChallenger() {
+  const name = document.getElementById('customChal').value.trim();
+  if(!name) return;
+  send('selectChallenger', name);
+  document.getElementById('customChal').value = '';
+}
+
+/* ─ PLAYERS ─ */
+function addPlayer() {
+  const inp = document.getElementById('addNameInp');
+  const name = inp.value.trim();
+  if(!name) { toast('Enter a name!','error'); return; }
+  send('addPlayer', name);
+  inp.value = '';
+  toast(name + ' added!', 'success');
+}
+
+function renderPlayersList() {
+  const el = document.getElementById('playersList');
+  if(!state.players || !state.players.length) {
+    el.innerHTML = '<div style="color:var(--dim);font-size:.8rem;text-align:center;padding:10px;">No players yet</div>';
+    return;
+  }
+  el.innerHTML = state.players.map((p,i) => `
+    <div class="pitem ${p.used?'used':''} ${state.currentPlayer===p.name?'current':''}">
+      <div>
+        <div class="pname">${state.currentPlayer===p.name?'🎯 ':''}${p.used&&state.currentPlayer!==p.name?'✓ ':''}${p.name}</div>
+        <div class="ppts">${p.pts} pts · Ch: ${p.challengeCount}/2</div>
+      </div>
+      <div class="pacts">
+        <button class="pbtn pi" onclick="send('adjustPts',{idx:${i},delta:5})">+</button>
+        <button class="pbtn pd" onclick="send('adjustPts',{idx:${i},delta:-5})">−</button>
+        <button class="btn btn-ghost btn-sm" onclick="removePlayer(${i})" style="padding:4px 8px;">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function removePlayer(i) {
+  if(!confirm('Remove ' + state.players[i].name + '?')) return;
+  send('removePlayer', i);
+}
+
+function renderManualList() {
+  const el = document.getElementById('manualList');
+  if(!state.players || !state.players.length) {
+    el.innerHTML = '<div style="color:var(--dim);font-size:.8rem;">Add players first</div>';
+    return;
+  }
+  const stg = {easy:10,medium:20,hard:30,extreme:40};
+  const pts = stg[state.stage] || 10;
+  el.innerHTML = state.players.map((p,i) => `
+    <div class="mrow">
+      <span class="mname">${p.name}</span>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <span class="mpts">${p.pts}pts</span>
+        <button class="pbtn pi" style="width:34px;font-size:.68rem;" onclick="send('adjustPts',{idx:${i},delta:${pts}})">+${pts}</button>
+        <button class="pbtn pd" style="width:34px;font-size:.68rem;" onclick="send('adjustPts',{idx:${i},delta:-${pts}})">-${pts}</button>
+        <button class="pbtn pi" onclick="send('adjustPts',{idx:${i},delta:5})">+</button>
+        <button class="pbtn pd" onclick="send('adjustPts',{idx:${i},delta:-5})">−</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ─ QUESTION SETS ─ */
+function addQset() {
+  const a = document.getElementById('qA').value.trim();
+  const b = document.getElementById('qB').value.trim();
+  const c = document.getElementById('qC').value.trim();
+  const explain = document.getElementById('qExplain').value.trim();
+  if(!a||!b||!c) { toast('Fill all 3 statements!','error'); return; }
+  send('addQset', {a,b,c,lie:'c',explain});
+  ['qA','qB','qC','qExplain'].forEach(id => document.getElementById(id).value = '');
+  toast('Question added!','success');
+}
+
+function renderQsets() {
+  const el = document.getElementById('qsetList');
+  const all = [...(state.defaultSets||[]), ...(state.questionSets||[])];
+  if(!all.length) { el.innerHTML = '<div style="color:var(--dim);font-size:.76rem;">No sets yet</div>'; return; }
+  el.innerHTML = all.map((q,i) => `
+    <div class="qitem ${state.currentSet && state.currentSet.a===q.a && state.currentSet.b===q.b?'sel':''}" onclick="send('selectQset',${i})">
+      <div class="qitem-head">
+        <span>Set ${i+1} ${q.used?'<span style="opacity:.5">(used)</span>':''}</span>
+        <span style="font-size:.6rem;padding:2px 8px;border-radius:999px;background:rgba(255,77,0,.12);color:var(--fire);">
+          ${state.currentSet && state.currentSet.a===q.a?'✓ ACTIVE':'SELECT'}
+        </span>
+      </div>
+      <div class="qitem-body">
+        <span style="color:#00ff64">A:</span> ${q.a}<br/>
+        <span style="color:#00ff64">B:</span> ${q.b}<br/>
+        <span style="color:#ff003c">C (LIE):</span> ${q.c}
+      </div>
+    </div>`).join('');
+}
+
+/* ─ LEADERBOARD ─ */
+function renderFullLb() {
+  if(!state.players) return;
+  const sorted = [...state.players].sort((a,b) => b.pts - a.pts);
+  const el = document.getElementById('fullLb');
+  if(!sorted.length) { el.innerHTML = '<div style="text-align:center;color:var(--dim);padding:2rem;">No players yet</div>'; return; }
+  const medals = ['🥇','🥈','🥉'];
+  const classes = ['r1','r2','r3'];
+  const rankCls = ['g','s','b'];
+  el.innerHTML = sorted.map((p,i) => `
+    <div class="lb-item ${classes[i]||''}">
+      <div class="lb-rank ${rankCls[i]||''}">${medals[i]||'#'+(i+1)}</div>
+      <div>
+        <div class="lb-name">${p.name}${state.currentPlayer===p.name?' 🎯':''}</div>
+        <div style="font-size:.65rem;color:var(--dim);">Challenges: ${p.challengeCount}</div>
+      </div>
+      <div class="lb-pts">${p.pts}</div>
+    </div>`).join('');
+}
+
+function exportCSV() {
+  if(!state.players) return;
+  const sorted = [...state.players].sort((a,b) => b.pts - a.pts);
+  const rows = ['Rank,Name,Points,Challenges'];
+  sorted.forEach((p,i) => rows.push(`${i+1},${p.name},${p.pts},${p.challengeCount}`));
+  const blob = new Blob([rows.join('\n')],{type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'TruthLie_Results.csv';
+  a.click();
+}
+
+/* ─ RANDOM PICK ─ */
+function pickRandom() {
+  const avail = state.players ? state.players.filter(p => !p.used) : [];
+  if(!avail.length) { toast('All players used!','error'); return; }
+  send('pickRandom');
+  toast('🎲 Spinning...','gold');
+}
+
+/* ─ DANGER ─ */
+function dangerReset() {
+  if(!confirm('Reset ALL scores to 0?')) return;
+  send('resetAllScores');
+  toast('Scores reset!','error');
+}
+function dangerClear() {
+  if(!confirm('Remove ALL players?')) return;
+  send('clearAllPlayers');
+  toast('Cleared!','error');
+}
+
+/* ─ TABS ─ */
+function switchTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ─ TOAST ─ */
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  const inner = document.getElementById('toastInner');
+  inner.textContent = msg;
+  const colors = {error:'rgba(255,0,60,.92)',gold:'rgba(200,160,0,.95)',neon:'rgba(0,180,160,.92)',success:'rgba(0,180,70,.92)'};
+  const text = {gold:'#000',neon:'#000'};
+  inner.style.background = colors[type] || colors.success;
+  inner.style.color = text[type] || '#fff';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+connect();
+</script>
+</body>
+</html>
